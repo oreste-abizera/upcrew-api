@@ -1,8 +1,9 @@
-const { User, validateUser } = require("../models/User")
+const { User } = require("../models/User")
 const { hashPassword } = require("../utils/hash.js")
-const { getUserUniqueness, checkValidUser } = require("../utils/functions")
+const { checkValidUser } = require("../utils/functions")
 const ErrorResponse = require("../utils/ErrorResponse")
 const { asyncHandler } = require("../middlewares/async")
+const Joi = require("joi")
 
 // @desc                getting all users
 //@route                GET /api/v1/users
@@ -12,7 +13,7 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
     if (!users) {
         return next(new ErrorResponse("no users found", 404))
     }
-    res.send({
+    res.json({
         success: true,
         count: users.length,
         data: users
@@ -31,44 +32,11 @@ exports.getSingleUser = asyncHandler(async (req, res, next) => {
     if (!user.valid) {
         return next(new ErrorResponse(`user with id ${req.params.id} not found`, 404))
     }
-    res.send({
+    res.status(200).json({
         success: true,
         data: user.user
     })
 })
-
-
-
-
-// @desc                create new user
-//@route                POST /api/v1/users
-// @access              public route
-exports.createUser = asyncHandler(async (req, res, next) => {
-
-    //create user
-    let { value: newUser, error } = validateUser(req.body)
-    if (error) {
-        return next(new ErrorResponse(error.details[0].message, 400))
-    }
-
-
-    if (newUser.gender !== "") newUser.gender = newUser.gender.toLowerCase()
-    newUser.userPassword = await hashPassword(newUser.userPassword)
-
-    //@check uniqueness of the user details
-    let checkUnique = await getUserUniqueness(newUser)
-    if (checkUnique.unique === false) {
-        next(new ErrorResponse(checkUnique.message, 400))
-    }
-    newUser = await User.create(newUser)
-    res.status(201).send({
-        success: true,
-        data: newUser
-    })
-
-    //end of create user
-})
-
 
 
 
@@ -85,6 +53,10 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
 
 
     let updates = { ...req.body }
+    const { error } = validateUserBeforeUpdate(req.body)
+    if (error) {
+        return next(new ErrorResponse(error.details[0].message, 404))
+    }
     if (updates.userPassword) {
         updates.userPassword = await hashPassword(updates.userPassword)
     }
@@ -98,6 +70,10 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
         if (father.user.gender !== "male") {
             return next(new ErrorResponse(`father provided is not male`, 400))
         }
+
+        if (father.user.type !== "parent") {
+            return next(new ErrorResponse(`father provided with id of ${updates.father} is not registered as a parent`, 400))
+        }
     }
 
     if (updates.mother) {
@@ -108,13 +84,17 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
         if (mother.user.gender !== "female") {
             return next(new ErrorResponse(`mother provided is not female`, 400))
         }
+
+        if (mother.user.type !== "parent") {
+            return next(new ErrorResponse(`mother provided with id of ${updates.mother} is not registered as a parent`, 400))
+        }
     }
 
 
 
     updates = await User.findByIdAndUpdate(req.params.id, updates, { new: true })
 
-    res.send({
+    res.json({
         success: true,
         data: updates
     })
@@ -131,8 +111,33 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`user with id ${req.params.id} not found`, 404))
     }
     await User.findOneAndDelete({ _id: req.params.id })
-    res.send({
+    res.json({
         success: true,
         data: {}
     })
 })
+
+
+//function to validate info before update
+const validateUserBeforeUpdate = (User) => {
+    const schema = {
+        firstName: Joi.string().max(255).min(2),
+        lastName: Joi.string().max(255).min(2),
+        userName: Joi.string().max(255).min(2),
+        userEmail: Joi.string().max(255).min(3).email(),
+        userPassword: Joi.string().max(255).min(6),
+        type: Joi.string().min(1).max(9),
+        dateOfBirth: Joi.date(),
+        userCountry: Joi.string().max(255).min(2),
+        gender: Joi.string().min(4).max(6),
+        phoneNumber: Joi.string().min(10).max(10),
+        currentClass: Joi.string(),
+        classTeacher: Joi.string(),
+        occupation: Joi.string().min(2).max(255),
+        father: Joi.string(),
+        mother: Joi.string(),
+        image: Joi.string(),
+        children: Joi.array()
+    }
+    return Joi.validate(User, schema)
+}

@@ -1,7 +1,9 @@
 const mongoose = require("mongoose")
 const Joi = require("joi")
+const jwt = require("jsonwebtoken")
+const bcrypt = require("bcryptjs")
 
-const UsersSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     firstName: {
         type: String,
         minlength: [2, "First name can not be less than 2 characters"],
@@ -50,8 +52,9 @@ const UsersSchema = new mongoose.Schema({
     },
     userPassword: {
         type: String,
-        minlength: [6, 'password must be greater than 6 characters'],
+        minlength: 6,
         required: true,
+        select: false
     },
     type: {
         type: String,
@@ -65,22 +68,25 @@ const UsersSchema = new mongoose.Schema({
     },
     phoneNumber: {
         type: String,
-        minlength: [10, "phone number must be 10 characters"],
-        maxlength: [10, "phone number must be 10 characters"],
+        minlength: 10,
+        maxlength: 10,
     },
     children: {
-        type: [String]
+        type: [String],
+        select: false
     },
     currentClass: String,
     classTeacher: String,
-    father: String,
-    mother: String,
+    father: mongoose.Schema.ObjectId,
+    mother: mongoose.Schema.ObjectId,
     image: String,
     occupation: {
         type: String,
         min: 2,
         max: 255
     },
+    resetPasswordToken: String,
+    resetPasswordExpire: String,
     createdAt: {
         type: Date,
         default: Date.now()
@@ -88,6 +94,23 @@ const UsersSchema = new mongoose.Schema({
 })
 
 
+//sign Jwt
+UserSchema.methods.getSignedJwtToken = function () {
+    return jwt.sign({
+        id: this._id
+    }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRE
+    })
+}
+
+
+//match password
+UserSchema.methods.comparePasswords = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.userPassword)
+}
+
+
+//joi validation
 const validateUser = (User) => {
     const schema = {
         firstName: Joi.string().max(255).min(2).required(),
@@ -111,6 +134,6 @@ const validateUser = (User) => {
     return Joi.validate(User, schema)
 }
 
-const User = mongoose.model("User", UsersSchema)
+const User = mongoose.model("User", UserSchema)
 module.exports.User = User
 module.exports.validateUser = validateUser
