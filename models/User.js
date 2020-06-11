@@ -137,12 +137,12 @@ const validateUser = (User) => {
 };
 
 //virtual classes field
-// UserSchema.virtual("classes", {
-//   ref: "Class",
-//   localField: "_id",
-//   foreignField: "classTeacher",
-//   justOne: false,
-// });
+UserSchema.virtual("classes", {
+  ref: "Class",
+  localField: "_id",
+  foreignField: "classTeacher",
+  justOne: false,
+});
 
 const User = mongoose.model("User", UserSchema);
 module.exports.User = User;

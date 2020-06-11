@@ -9,7 +9,7 @@ const Joi = require("joi");
 //@route                GET /api/v1/users
 // @access              private route
 exports.getUsers = asyncHandler(async (req, res, next) => {
-  let users = await User.find();
+  let users = await User.find().populate("classes");
   if (!users) {
     return next(new ErrorResponse("no users found", 404));
   }

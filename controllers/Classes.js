@@ -6,10 +6,7 @@ const { Class } = require("../models/Class");
 //@route                GET /api/v1/classes
 // @access              private route
 exports.getClasses = asyncHandler(async (req, res, next) => {
-  let classes = await Class.find().populate({
-    path: "classTeacher",
-    select: "firstName lastName image",
-  });
+  let classes = await Class.find();
   if (!classes) {
     return next(new ErrorResponse("no classes found", 404));
   }
