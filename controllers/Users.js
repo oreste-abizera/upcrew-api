@@ -1,3 +1,4 @@
+const path = require("path");
 const { User } = require("../models/User");
 const { hashPassword } = require("../utils/hash.js");
 const { checkValidUser } = require("../utils/functions");
@@ -129,6 +130,56 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
   res.json({
     success: true,
     data: {},
+  });
+});
+
+// @desc                getting single user
+//@route                PUT /api/v1/users/:id/photoupload
+// @access              private route
+exports.updatePicture = asyncHandler(async (req, res, next) => {
+  let user = await User.findById(req.params.id);
+  if (!user) {
+    return next(
+      new ErrorResponse(`user with id ${req.params.id} not found`, 404)
+    );
+  }
+
+  if (!req.files) {
+    return next(new ErrorResponse(`please upload an image`, 400));
+  }
+
+  const file = req.files.file;
+
+  if (!file.mimetype.startsWith("image")) {
+    return next(new ErrorResponse(`Please upload an image file`, 400));
+  }
+
+  // Check filesize
+  if (file.size > process.env.MAX_FILE_UPLOAD) {
+    return next(
+      new ErrorResponse(
+        `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
+        400
+      )
+    );
+  }
+
+  file.name = `user_${user._id}${path.parse(file.name).ext}`;
+
+  file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async (err) => {
+    if (err) {
+      console.log(err);
+      return next(new ErrorResponse("problem while uploading an image", 500));
+    }
+  });
+
+  let finalUser = await User.findByIdAndUpdate(req.params.id, {
+    image: file.name,
+  });
+  console.log(file);
+  res.status(200).json({
+    success: true,
+    data: finalUser,
   });
 });
 

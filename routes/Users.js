@@ -5,6 +5,7 @@ const {
   getSingleUser,
   updateUser,
   deleteUser,
+  updatePicture,
 } = require("../controllers/Users");
 const { protect, authorize } = require("../middlewares/Auth");
 
@@ -14,4 +15,5 @@ router
   .get(protect, getSingleUser)
   .put(protect, authorize("headmaster"), updateUser)
   .delete(protect, authorize("headmaster"), deleteUser);
+router.put("/:id/photoupload", protect, updatePicture);
 module.exports = router;

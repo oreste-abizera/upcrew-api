@@ -63,8 +63,8 @@ exports.deleteClass = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc                deleting a class
-//@route                DELETE /api/v1/classes/:id
+// @desc                updating a class
+//@route                PUT /api/v1/classes/:id
 // @access              private route
 exports.updateClass = asyncHandler(async (req, res, next) => {
   let updatedClass = await Class.findByIdAndUpdate(req.params.id, req.body, {
