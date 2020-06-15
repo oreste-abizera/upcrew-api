@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "title": "Enemy of the people",
+        "type": "novel",
+        "author": "Henrick Ibsen",
+        "amount": 5
+    },
+    {
+        "id": 2,
+        "title": "Vue js book",
+        "type": "Vue js",
+        "author": "Mell Keen",
+        "amount": 2
+    },
+    {
+        "id": 3,
+        "title": "Mathematics grade 1 book",
+        "type": "Mathematics",
+        "author": "Donald Ryan",
+        "amount": 2
+    }
+]

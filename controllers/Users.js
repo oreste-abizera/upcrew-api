@@ -150,6 +150,7 @@ exports.updatePicture = asyncHandler(async (req, res, next) => {
 
   const file = req.files.file;
 
+  console.log(file);
   if (!file.mimetype.startsWith("image")) {
     return next(new ErrorResponse(`Please upload an image file`, 400));
   }
@@ -164,7 +165,7 @@ exports.updatePicture = asyncHandler(async (req, res, next) => {
     );
   }
 
-  file.name = `user_${user._id}${path.parse(file.name).ext}`;
+  file.name = `photo_${user._id}${path.parse(file.name).ext}`;
 
   file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async (err) => {
     if (err) {
@@ -176,7 +177,6 @@ exports.updatePicture = asyncHandler(async (req, res, next) => {
   let finalUser = await User.findByIdAndUpdate(req.params.id, {
     image: file.name,
   });
-  console.log(file);
   res.status(200).json({
     success: true,
     data: finalUser,

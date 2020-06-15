@@ -61,8 +61,6 @@ const UserSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      minlength: 10,
-      maxlength: 10,
     },
     children: {
       type: [String],
