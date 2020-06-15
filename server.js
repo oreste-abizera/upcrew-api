@@ -32,6 +32,7 @@ const ClassesRoute = require("./routes/Classes");
 const AssignmentsRoute = require("./routes/Assignments");
 const QuestionsRoute = require("./routes/Questions");
 const ResultsRoute = require("./routes/Results");
+const MessagesRoute = require("./routes/Messages");
 
 app.get("/", (req, res) => {
   res.send("welcome to upcrew_api");
@@ -44,6 +45,7 @@ app.use("/api/v1/classes", ClassesRoute);
 app.use("/api/v1/assignments", AssignmentsRoute);
 app.use("/api/v1/questions", QuestionsRoute);
 app.use("/api/v1/results", ResultsRoute);
+app.use("/api/v1/messages", MessagesRoute);
 
 app.use(ErrorHandler);
 
