@@ -4,7 +4,6 @@ const { hashPassword } = require("../utils/hash.js");
 const { checkValidUser } = require("../utils/functions");
 const ErrorResponse = require("../utils/ErrorResponse");
 const { asyncHandler } = require("../middlewares/async");
-const Joi = require("joi");
 
 // @desc                getting all users
 //@route                GET /api/v1/users
@@ -51,10 +50,6 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   }
 
   let updates = { ...req.body };
-  const { error } = validateUserBeforeUpdate(req.body);
-  if (error) {
-    return next(new ErrorResponse(error.details[0].message, 404));
-  }
   if (updates.userPassword) {
     updates.userPassword = await hashPassword(updates.userPassword);
   }
@@ -133,10 +128,12 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc                getting single user
+// @desc                uploading a profile picture
 //@route                PUT /api/v1/users/:id/photoupload
 // @access              private route
 exports.updatePicture = asyncHandler(async (req, res, next) => {
+  console.log("BODY: ".green.inverse, req.body);
+
   let user = await User.findById(req.params.id);
   if (!user) {
     return next(
@@ -182,27 +179,3 @@ exports.updatePicture = asyncHandler(async (req, res, next) => {
     data: finalUser,
   });
 });
-
-//function to validate info before update
-const validateUserBeforeUpdate = (User) => {
-  const schema = {
-    firstName: Joi.string().max(255).min(2),
-    lastName: Joi.string().max(255).min(2),
-    userName: Joi.string().max(255).min(2),
-    userEmail: Joi.string().max(255).min(3).email(),
-    userPassword: Joi.string().max(255).min(6),
-    type: Joi.string().min(1).max(9),
-    dateOfBirth: Joi.date(),
-    userCountry: Joi.string().max(255).min(2),
-    gender: Joi.string().min(4).max(6),
-    phoneNumber: Joi.string().min(10).max(10),
-    currentClass: Joi.string(),
-    classTeacher: Joi.string(),
-    occupation: Joi.string().min(2).max(255),
-    father: Joi.string(),
-    mother: Joi.string(),
-    image: Joi.string(),
-    children: Joi.array(),
-  };
-  return Joi.validate(User, schema);
-};

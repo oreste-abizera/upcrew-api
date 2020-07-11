@@ -101,7 +101,11 @@ exports.submitQuiz = asyncHandler(async (req, res, next) => {
     let question = questions.find((record) => {
       return record._id == item.id;
     });
-    item.score = question.answer === item.value ? question.score : 0;
+    item.score =
+      question.answer.toString().toLowerCase() ===
+      item.value.toString().toLowerCase()
+        ? question.score
+        : 0;
     return item;
   });
   let quizResults;

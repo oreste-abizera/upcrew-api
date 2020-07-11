@@ -110,30 +110,6 @@ UserSchema.methods.comparePasswords = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.userPassword);
 };
 
-//joi validation
-const validateUser = (User) => {
-  const schema = {
-    firstName: Joi.string().max(255).min(2).required(),
-    lastName: Joi.string().max(255).min(2).required(),
-    userName: Joi.string().max(255).min(2).required(),
-    userEmail: Joi.string().max(255).min(3).required().email(),
-    userPassword: Joi.string().max(255).min(6).required(),
-    type: Joi.string().min(1).max(9).default("student"),
-    dateOfBirth: Joi.date(),
-    userCountry: Joi.string().max(255).min(2).required(),
-    gender: Joi.string().min(4).max(6).required(),
-    phoneNumber: Joi.string().min(10).max(10),
-    currentClass: Joi.string(),
-    classTeacher: Joi.string(),
-    occupation: Joi.string().min(2).max(255),
-    father: Joi.string(),
-    mother: Joi.string(),
-    image: Joi.string(),
-    children: Joi.array(),
-  };
-  return Joi.validate(User, schema);
-};
-
 //virtual classes field
 UserSchema.virtual("classes", {
   ref: "Class",
@@ -144,4 +120,3 @@ UserSchema.virtual("classes", {
 
 const User = mongoose.model("User", UserSchema);
 module.exports.User = User;
-module.exports.validateUser = validateUser;
