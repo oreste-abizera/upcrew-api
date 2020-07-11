@@ -10,6 +10,9 @@ exports.getAssignments = asyncHandler(async (req, res, next) => {
   if (!assignments) {
     return next(new ErrorResponse("no assignments found", 404));
   }
+  if (req.user.type !== "teacher") {
+    assignments = assignments.filter((item) => item.status === "published");
+  }
   res.json({
     success: true,
     count: assignments.length,
